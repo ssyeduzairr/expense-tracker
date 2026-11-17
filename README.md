@@ -1,91 +1,89 @@
 # Real Estate Expense Tracker
 
-A simple website with two pages:
+A simple, free website for recording and tracking project expenses, with a login for each person.
 
-| Page | Who uses it | What it does |
+**Live site:** https://ssyeduzairr.github.io/expense-tracker/
+
+**Cost: ₹0.** Database = Supabase free plan. Website hosting = GitHub Pages (free).
+
+---
+
+## User types
+
+| User type | Add expenses | See expenses | Edit / delete | Manage users, projects, categories |
+|---|:-:|:-:|:-:|:-:|
+| **Admin (full access)** | ✅ | ✅ all | ✅ | ✅ |
+| **Entry + View** | ✅ | ✅ all + totals | ❌ | ❌ |
+| **Entry only** | ✅ | only their own | ❌ | ❌ |
+
+- Everyone logs in with a **username + password** created by the Admin (no email needed).
+- "Entered by" and the time are recorded automatically from the login.
+- When the Admin edits an entry, the table shows **"edited by …"** with the time.
+
+## Pages
+
+| Page | Who | What |
 |---|---|---|
-| **Add expense** (`index.html`) | Anyone with the link | Fill in project name, date, category, label (sub-category), paid to, amount, payment mode, approved by, entered by, notes. Time of entry is saved automatically. |
-| **Track expenses** (`track.html`) | Main expense handler (password) | Search by project name / date / category, see totals by category and project, delete wrong entries, download CSV for Excel, change the password. |
+| `login.html` | everyone | Log in. The very first visit asks to create the Admin account. |
+| `index.html` — Add expense | everyone | Project, date, amount, category, sub-category, paid to, payment mode, approved by, notes. Below it: "My recent entries". |
+| `track.html` — Track expenses | Admin, Entry + View | Filter by project / dates / category / text; totals by category & project; download CSV for Excel. Admin also gets **Edit** and **Delete**. |
+| `admin.html` — Settings | Admin | **Users** (add, change type, block, reset password), **Projects** (add, rename, hide), **Categories & sub-categories** (add, rename, hide, delete). |
 
-**Cost: ₹0.** Database = Supabase free plan. Website hosting = GitHub Pages (free) or Netlify (free).
+## Where is the data stored?
 
----
+In a **PostgreSQL database** hosted by **Supabase** (a real database, not an Excel file).
+- Nobody can read or change it directly. Every action goes through checked functions that verify the login and the user type.
+- Passwords are stored only as secure hashes (bcrypt), never as plain text.
+- To get an Excel copy: **Track expenses → Download CSV (Excel)**. Do this now and then as a backup.
+- The Admin can also see the raw tables in the Supabase dashboard → **Table Editor**.
 
-## Step 1 — Create the free database (Supabase) · ~5 min
+## Day-to-day tasks (Admin)
 
-1. Go to <https://supabase.com> → **Start your project** → sign up (GitHub or email). No card needed.
-2. Click **New project**. Give it a name (e.g. `expenses`), set a database password (save it somewhere — you won't need it day to day), choose region **Mumbai (ap-south-1)**, plan **Free**. Click **Create**.
-3. When it finishes, open **SQL Editor** (left sidebar) → **New query**.
-4. Open `supabase/setup.sql` from this folder, copy everything, paste it in.
-5. Click **Run** (confirm if Supabase warns about "destructive operations"). You should see *Success. No rows returned*.
-6. The Track-page password is **not** set here: the first time you open `track.html` it asks you to **create** it (this works only once).
+- **Add a person:** Settings → Users → **+ Add user**. Pick the user type, set a password, and tell them their username + password.
+- **Someone forgot their password:** Settings → Users → **Edit** → type a new password → Save.
+- **Someone left:** Settings → Users → **Edit** → untick "Account active". They are logged out immediately.
+- **New project:** Settings → Projects → Add. When a project is finished, click **Hide** (its expenses stay).
+- **New category / sub-category:** Settings → Categories.
+- **Fix a wrong entry:** Track expenses → **Edit**.
 
-## Step 2 — Connect the website to the database · ~1 min
+Renaming a project, category or sub-category also updates the old entries. Items already used in expenses can be hidden but not deleted.
 
-1. In Supabase go to **Project Settings → API** (or **Data API** / **API Keys**).
-2. Copy the **Project URL** (looks like `https://abcdxyz.supabase.co`).
-3. Copy the **anon public** key (or the **publishable** key, starts with `sb_publishable_`).
-4. Open `config.js` and paste them in:
+## If the Admin forgets their own password
 
-   ```js
-   SUPABASE_URL: "https://abcdxyz.supabase.co",
-   SUPABASE_ANON_KEY: "eyJhbGciOi....",
-   BUSINESS_NAME: "Sharma Real Estate Expenses",
-   ```
+Another Admin can reset it in Settings. If there's no other Admin, open Supabase → **SQL Editor** and run (change the username and password):
 
-> ✅ The anon/publishable key is designed to be public — it's fine for it to be in the website.
-> ❌ Never paste the `service_role` / `secret` key anywhere in this project.
-
-**Test it locally:** double-click `index.html` to open it in your browser, add a test expense, then open `track.html`, create/enter your password and search.
-
-## Step 3 — Put it on the internet for free
-
-### Option A: GitHub Pages (recommended — permanent, free)
-
-1. Create a free account at <https://github.com>.
-2. Click **+ → New repository**. Name it e.g. `expenses`. Choose **Public** (Pages is free for public repos — the data is NOT in the code, it's safely in Supabase). Click **Create repository**.
-3. Click **uploading an existing file**, then drag **all the files and folders** from this folder (`index.html`, `track.html`, `add.js`, `track.js`, `common.js`, `config.js`, `style.css`, `supabase/`, `.github/`) into the page. Click **Commit changes**.
-   - Tip: the `.github` folder is hidden on some computers. If it doesn't upload, skip it — it's only the optional "keep awake" helper (see below).
-4. Go to **Settings → Pages**. Under *Build and deployment*, Source = **Deploy from a branch**, Branch = **main**, folder **/ (root)** → **Save**.
-5. Wait ~1 minute. Your site is live at:
-   **`https://<your-github-username>.github.io/expenses/`**
-   The track page is at `.../expenses/track.html`.
-
-### Option B: Netlify (drag & drop)
-
-1. Sign up free at <https://app.netlify.com>.
-2. Go to **Sites → Add new site → Deploy manually** and drag this whole folder onto the page.
-3. You get a link like `https://random-name.netlify.app` (you can rename it under *Site configuration → Change site name*).
-
-To update the site later: on GitHub, upload the changed file again; on Netlify, drag the folder again.
+```sql
+update public.app_users
+set password_hash = extensions.crypt('NewPassword123', extensions.gen_salt('bf', 10)), active = true
+where username = 'your-admin-username';
+```
 
 ---
+
+## Setting it up from scratch (only needed for a brand-new copy)
+
+1. Create a free project at <https://supabase.com> (region **Mumbai**).
+2. Supabase → **SQL Editor** → New query → paste all of `supabase/setup.sql` → **Run** (confirm the "destructive operations" warning). It's safe to run again later. It never deletes expenses.
+3. Supabase → **Project Settings → API Keys**: copy the Project URL and the **publishable** key into `config.js`. Never put the **secret** key in this project.
+4. Put the files on GitHub and turn on **Settings → Pages** (branch `main`, folder `/ (root)`).
+5. Open the site → create the Admin account → add projects and users in Settings.
 
 ## Good to know
 
-- **Supabase free projects pause after ~7 days of no use.** If the site says it can't reach the database, open your Supabase dashboard and click **Restore project**. The included GitHub Action (`.github/workflows/keep-supabase-awake.yml`) pings the database every 3 days to prevent this automatically — it works on its own once the files are on GitHub. You can test it from the repo's **Actions** tab → *Keep Supabase awake* → **Run workflow**.
-- **How the password works:** the password is checked inside the database (stored as a bcrypt hash), not in the website code — so nobody can read expenses by looking at the page source or calling the database directly. Wrong guesses are slowed down. Use a strong password.
-- **The Add page is open to anyone with the link** (as requested). Only share the link with people who should add expenses. Junk entries can be deleted from the Track page.
-- **Forgot the password?** In Supabase → SQL Editor run:
-  ```sql
-  update public.app_settings
-  set password_hash = extensions.crypt('YourNewPassword', extensions.gen_salt('bf', 10))
-  where id = 1;
-  ```
-- **Backups / Excel:** use *Download CSV* on the Track page (opens in Excel). You can also see all data in Supabase → **Table Editor → expenses**.
-- **Change categories / sub-categories:** edit the `CATEGORIES` list at the top of `common.js`.
-- **Free limits:** Supabase free = 500 MB database (roughly a million+ expense rows) — far more than needed.
+- **Supabase free projects pause after ~7 days of no use.** The included GitHub Action (`.github/workflows/keep-supabase-awake.yml`) pings the database every 3 days to prevent this. If the site ever says it can't reach the database, open the Supabase dashboard and click **Restore project**.
+- **Free limits:** 500 MB database (over a million expense rows), far more than needed.
+- **Payment modes** (Cash, UPI, …) can be edited in `PAYMENT_MODES` at the top of `common.js`.
 
 ## Files
 
 ```
-index.html     Add-expense page
-track.html     Track/search page (password)
-add.js         Logic for the add page
-track.js       Logic for the track page
-common.js      Shared settings: categories, payment modes, helpers
-config.js      ← your Supabase URL + key go here
-style.css      Look & feel (works on phone and computer, light/dark)
-supabase/setup.sql                      Run once in Supabase
-.github/workflows/keep-supabase-awake.yml  Optional free keep-alive
+login.html / login.js     Log in + first-time Admin setup
+index.html / add.js       Add expense + "My recent entries"
+track.html / track.js     Track, filter, totals, edit/delete (Admin), CSV
+admin.html / admin.js     Settings: users, projects, categories
+common.js                 Shared: login session, menus, expense form, helpers
+config.js                 Supabase URL + publishable key
+style.css                 Look & feel (phone + computer, light/dark)
+supabase/setup.sql        Database tables, security and functions
+.github/workflows/keep-supabase-awake.yml   Free keep-alive
 ```
