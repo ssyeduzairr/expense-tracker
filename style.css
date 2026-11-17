@@ -174,3 +174,87 @@ tfoot td { font-weight: 700; background: var(--surface-2); }
 
 details.settings summary { cursor: pointer; font-weight: 600; color: var(--muted); }
 details.settings form { margin-top: 12px; max-width: 520px; }
+
+/* ---------- v2: logins, roles, settings ---------- */
+body:not(.ready) main { visibility: hidden; }
+.topbar nav { flex: 1; }
+.userbox { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.userbox .who { display: flex; flex-direction: column; line-height: 1.15; margin-right: 4px; font-size: .9rem; }
+.userbox .role { color: var(--muted); font-size: .75rem; }
+@media (max-width: 640px) {
+  .topbar nav { order: 3; flex-basis: 100%; overflow-x: auto; }
+  .userbox .who { display: none; }
+}
+
+.grid.one { grid-template-columns: 1fr; }
+.small-note { font-size: .85rem; margin: 12px 0 0; }
+.muted.tight { margin: 0; }
+.hint { font-weight: 400; font-size: .8rem; }
+.sub { font-size: .8rem; margin-top: 2px; }
+.pct { font-weight: 400; }
+.edited { font-size: .75rem; color: var(--warn); margin-top: 2px; }
+.no-admin .admin-only { display: none; }
+table.compact { min-width: 640px; }
+
+dialog {
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 0;
+  background: var(--surface); color: var(--text);
+  width: min(560px, calc(100% - 32px)); max-height: calc(100% - 32px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+dialog::backdrop { background: rgba(10, 14, 20, .55); }
+.dialog-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.dialog-body h2 { margin-bottom: 0; font-size: 1.2rem; }
+.dialog-body .form-actions { margin-top: 4px; }
+.dialog-body.wide { min-width: 0; }
+dialog:has(.wide) { width: min(720px, calc(100% - 32px)); }
+
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: .9rem; }
+.check input { width: auto; margin-top: 3px; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.tab {
+  font: inherit; font-weight: 600; font-size: .95rem; cursor: pointer;
+  padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted);
+}
+.tab.active { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
+
+.role-help {
+  display: grid; gap: 6px; font-size: .88rem; color: var(--muted);
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 14px;
+}
+.role-help strong { color: var(--text); }
+
+.status { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+.status.ok { background: var(--success-soft); color: var(--success); }
+.status.off { background: var(--danger-soft); color: var(--danger); }
+.tag.role-admin { background: var(--warn-soft); color: var(--warn); }
+.tag.role-entry { background: var(--surface-2); color: var(--muted); }
+tr.inactive td, li.inactive .item-name { opacity: .65; }
+
+.inline-add { display: flex; gap: 8px; margin: 4px 0 16px; }
+.inline-add input { flex: 1; }
+.inline-add.small { margin: 8px 0 0; }
+.inline-add.small input { padding: 7px 10px; font-size: .9rem; }
+
+.manage-list { list-style: none; margin: 0; padding: 0; }
+.manage-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.manage-list li:last-child { border-bottom: 0; }
+.manage-list li.empty { color: var(--muted); font-size: .9rem; justify-content: flex-start; }
+.item-name { font-weight: 500; overflow-wrap: anywhere; min-width: 0; }
+.item-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.cat-block { border: 1px solid var(--border); border-radius: 10px; padding: 6px 14px 12px; margin-bottom: 12px; }
+.cat-block .cat-head .item-name { font-weight: 700; }
+.cat-block .cat-head li { border-bottom: 1px solid var(--border); }
+.cat-block .subs { padding-left: 16px; }
+.cat-block .subs li { padding: 6px 0; font-size: .92rem; }
+.cat-block .subs .item-name { font-weight: 400; }
+.search-grid { grid-template-columns: 1.6fr 1fr 1fr 1.3fr 1.3fr auto; }
+@media (max-width: 1000px) { .search-grid { grid-template-columns: 1fr 1fr; } .search-grid .field:first-child, .search-grid .actions { grid-column: 1 / -1; } }
+@media (max-width: 420px) { .search-grid { grid-template-columns: 1fr; } }

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Settings · Expenses</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>₹</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">₹</span><span class="brand-name">Expense Tracker</span></div>
+    <nav id="nav"></nav>
+    <div id="userbox" class="userbox"></div>
+  </header>
+
+  <main class="container narrow">
+    <div id="config-warning" class="banner warn" hidden>
+      <strong>Not connected to the database yet.</strong> Open <code>config.js</code> and paste your Supabase URL and key (see README).
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="users" type="button" role="tab">Users</button>
+      <button class="tab" data-tab="projects" type="button" role="tab">Projects</button>
+      <button class="tab" data-tab="categories" type="button" role="tab">Categories</button>
+    </div>
+
+    <!-- USERS -->
+    <section class="card tab-panel" id="tab-users">
+      <div class="card-head">
+        <div>
+          <h1>Users</h1>
+          <p class="muted tight">Create a login for each person and choose what they can do.</p>
+        </div>
+        <button class="btn primary" id="add-user-btn" type="button">+ Add user</button>
+      </div>
+      <div class="role-help">
+        <div><strong>Admin (full access)</strong> — add, view, edit, delete, manage users, projects &amp; categories.</div>
+        <div><strong>Entry + View</strong> — add expenses and view all expenses &amp; totals. Cannot edit or delete.</div>
+        <div><strong>Entry only</strong> — add expenses and see only their own entries.</div>
+      </div>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Name</th><th>Username</th><th>User type</th><th>Status</th><th></th></tr></thead>
+          <tbody id="users"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="card tab-panel" id="tab-projects" hidden>
+      <h1>Projects</h1>
+      <p class="muted">These appear in the Project dropdown. <strong>Hide</strong> a finished project to remove it from the dropdown while keeping its expenses. Renaming also updates old entries.</p>
+      <form id="add-project" class="inline-add">
+        <input name="name" required maxlength="120" placeholder="New project name, e.g. Green Valley Plots">
+        <button class="btn primary">Add project</button>
+      </form>
+      <ul class="manage-list" id="projects"></ul>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section class="card tab-panel" id="tab-categories" hidden>
+      <h1>Categories &amp; sub-categories</h1>
+      <p class="muted">Add, rename or hide categories and their sub-categories. Renaming also updates old entries. Items already used in expenses can be hidden but not deleted.</p>
+      <form id="add-category" class="inline-add">
+        <input name="name" required maxlength="80" placeholder="New category name">
+        <button class="btn primary">Add category</button>
+      </form>
+      <div id="categories"></div>
+    </section>
+  </main>
+
+  <!-- User dialog -->
+  <dialog id="user-dialog">
+    <form id="user-form" class="dialog-body">
+      <h2 id="user-title">Add user</h2>
+      <label class="field"><span>Full name <span class="req">*</span></span>
+        <input name="full_name" required maxlength="80" placeholder="e.g. Ramesh"></label>
+      <label class="field"><span>Username <span class="req">*</span> <span class="muted hint">(letters/numbers, no spaces — used to log in)</span></span>
+        <input name="username" required pattern="[A-Za-z0-9._\-]{3,30}" autocapitalize="none" spellcheck="false" placeholder="e.g. ramesh"></label>
+      <label class="field"><span>User type <span class="req">*</span></span>
+        <select name="role" required>
+          <option value="entry">Entry only</option>
+          <option value="manager">Entry + View</option>
+          <option value="admin">Admin (full access)</option>
+        </select></label>
+      <label class="field"><span id="pw-label">Password <span class="req">*</span> <span class="muted hint">(8+ characters)</span></span>
+        <input type="text" name="password" minlength="8" autocomplete="off" spellcheck="false"></label>
+      <label class="check" id="active-wrap"><input type="checkbox" name="active" checked> Account active (untick to block this person from logging in)</label>
+      <div class="form-actions">
+        <button class="btn primary" id="user-save">Save</button>
+        <button class="btn" type="button" id="user-cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

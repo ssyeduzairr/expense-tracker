@@ -11,10 +11,8 @@
 <body>
   <header class="topbar">
     <div class="brand"><span class="brand-mark">₹</span><span class="brand-name">Expense Tracker</span></div>
-    <nav>
-      <a href="index.html">Add expense</a>
-      <a href="track.html" class="active">Track expenses</a>
-    </nav>
+    <nav id="nav"></nav>
+    <div id="userbox" class="userbox"></div>
   </header>
 
   <main class="container">
@@ -22,94 +20,68 @@
       <strong>Not connected to the database yet.</strong> Open <code>config.js</code> and paste your Supabase URL and key (see README).
     </div>
 
-    <!-- Locked view -->
-    <section id="login" class="card login">
-      <h1>Track expenses</h1>
-      <p class="muted">For the main expense handler only. Enter the password to view expenses.</p>
-      <form id="login-form">
+    <div class="card">
+      <form id="search-form" class="search-grid">
         <label class="field">
-          <span>Password</span>
-          <input type="password" name="password" required autocomplete="current-password">
+          <span>Project</span>
+          <select name="project"><option value="">All projects</option></select>
         </label>
-        <div class="form-actions"><button class="btn primary block" id="login-btn">Unlock</button></div>
+        <label class="field"><span>From</span><input type="date" name="from"></label>
+        <label class="field"><span>To</span><input type="date" name="to"></label>
+        <label class="field">
+          <span>Category</span>
+          <select name="category"><option value="">All categories</option></select>
+        </label>
+        <label class="field">
+          <span>Search text</span>
+          <input name="q" placeholder="Paid to, notes, name…" autocomplete="off">
+        </label>
+        <div class="actions">
+          <button class="btn primary" id="search-btn">Search</button>
+        </div>
       </form>
-    </section>
+    </div>
 
-    <!-- First-time setup: create the password (only shown while none exists) -->
-    <section id="setup" class="card login" hidden>
-      <h1>Create your password</h1>
-      <p class="muted">First-time setup. Choose the password the main expense handler will use to open this page. This can only be done once — later you can change it from inside.</p>
-      <form id="setup-form">
-        <div class="grid" style="grid-template-columns:1fr">
-          <label class="field"><span>New password (8+ characters)</span><input type="password" name="new1" required minlength="8" autocomplete="new-password"></label>
-          <label class="field"><span>Repeat password</span><input type="password" name="new2" required minlength="8" autocomplete="new-password"></label>
-        </div>
-        <div class="form-actions"><button class="btn primary block" id="setup-btn">Create password</button></div>
-      </form>
-    </section>
+    <div id="stats" class="stats"></div>
 
-    <!-- Unlocked view -->
-    <section id="dashboard" hidden>
-      <div class="card">
-        <form id="search-form" class="search-grid">
-          <label class="field">
-            <span>Project name</span>
-            <input name="project" list="project-list" autocomplete="off" placeholder="Leave blank for all projects">
-          </label>
-          <datalist id="project-list"></datalist>
-          <label class="field"><span>From</span><input type="date" name="from"></label>
-          <label class="field"><span>To</span><input type="date" name="to"></label>
-          <label class="field">
-            <span>Category</span>
-            <select name="category"><option value="">All categories</option></select>
-          </label>
-          <div class="actions">
-            <button class="btn primary" id="search-btn">Search</button>
-            <button type="button" class="btn" id="lock-btn" title="Lock this page">Lock</button>
-          </div>
-        </form>
+    <div class="two-col">
+      <div class="card"><h2>By category</h2><ul id="by-category" class="breakdown"></ul></div>
+      <div class="card"><h2>By project</h2><ul id="by-project" class="breakdown"></ul></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 id="table-title">Expenses</h2>
+        <button class="btn" id="csv-btn" type="button">Download CSV (Excel)</button>
       </div>
-
-      <div id="stats" class="stats"></div>
-
-      <div class="two-col">
-        <div class="card"><h2>By category</h2><ul id="by-category" class="breakdown"></ul></div>
-        <div class="card"><h2>By project</h2><ul id="by-project" class="breakdown"></ul></div>
+      <div class="table-wrap">
+        <table id="table">
+          <thead>
+            <tr>
+              <th>Date</th><th>Project</th><th>Category</th><th>Sub-category</th><th>Paid to</th>
+              <th class="num">Amount</th><th>Mode</th><th>Approved by</th><th>Entered by</th>
+              <th>Notes</th><th>Recorded at</th><th class="admin-only"></th>
+            </tr>
+          </thead>
+          <tbody id="rows"><tr><td colspan="12" class="empty">Loading…</td></tr></tbody>
+          <tfoot id="foot"></tfoot>
+        </table>
       </div>
-
-      <div class="card">
-        <div class="card-head">
-          <h2 id="table-title">Expenses</h2>
-          <button class="btn" id="csv-btn">Download CSV (Excel)</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th><th>Project</th><th>Category</th><th>Label</th><th>Paid to</th>
-                <th class="num">Amount</th><th>Mode</th><th>Approved by</th><th>Entered by</th>
-                <th>Notes</th><th>Recorded at</th><th></th>
-              </tr>
-            </thead>
-            <tbody id="rows"><tr><td colspan="12" class="empty">Loading…</td></tr></tbody>
-            <tfoot id="foot"></tfoot>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <details class="settings">
-          <summary>Change password</summary>
-          <form id="pw-form" class="grid">
-            <label class="field span-2"><span>Current password</span><input type="password" name="old" required autocomplete="current-password"></label>
-            <label class="field"><span>New password</span><input type="password" name="new1" required minlength="8" autocomplete="new-password"></label>
-            <label class="field"><span>Repeat new password</span><input type="password" name="new2" required minlength="8" autocomplete="new-password"></label>
-            <div class="span-2"><button class="btn primary">Update password</button></div>
-          </form>
-        </details>
-      </div>
-    </section>
+    </div>
   </main>
+
+  <!-- Edit dialog (Admin only) -->
+  <dialog id="edit-dialog">
+    <form id="edit-form" class="dialog-body wide">
+      <h2>Edit expense</h2>
+      <p class="muted" id="edit-meta"></p>
+      <div class="fields"></div>
+      <div class="form-actions">
+        <button class="btn primary" id="edit-save">Save changes</button>
+        <button class="btn" type="button" id="edit-cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
 
   <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
 

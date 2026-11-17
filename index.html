@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
   <title>Add Expense</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>₹</text></svg>">
   <link rel="stylesheet" href="style.css">
@@ -10,85 +11,42 @@
 <body>
   <header class="topbar">
     <div class="brand"><span class="brand-mark">₹</span><span class="brand-name">Expense Tracker</span></div>
-    <nav>
-      <a href="index.html" class="active">Add expense</a>
-      <a href="track.html">Track expenses</a>
-    </nav>
+    <nav id="nav"></nav>
+    <div id="userbox" class="userbox"></div>
   </header>
 
   <main class="container narrow">
     <div id="config-warning" class="banner warn" hidden>
       <strong>Not connected to the database yet.</strong> Open <code>config.js</code> and paste your Supabase URL and key (see README).
     </div>
+    <div id="no-projects" class="banner warn" hidden></div>
 
     <section class="card">
       <h1>Add an expense</h1>
-      <p class="muted">Fields marked <span class="req" style="color:var(--danger)">*</span> are required. Date &amp; time of entry is recorded automatically.</p>
-
+      <p class="muted">Fields marked <span class="req">*</span> are required. Your name and the time are recorded automatically.</p>
       <form id="expense-form">
-        <div class="grid">
-          <label class="field span-2">
-            <span>Project name <span class="req">*</span></span>
-            <input name="project_name" list="project-list" required maxlength="120" autocomplete="off" placeholder="e.g. Green Valley Plots">
-          </label>
-          <datalist id="project-list"></datalist>
-
-          <label class="field">
-            <span>Date <span class="req">*</span></span>
-            <input type="date" name="expense_date" required>
-          </label>
-
-          <label class="field">
-            <span>Amount (₹) <span class="req">*</span></span>
-            <input type="number" name="amount" required min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
-          </label>
-
-          <label class="field">
-            <span>Category <span class="req">*</span></span>
-            <select name="category" required>
-              <option value="">Select a category…</option>
-            </select>
-          </label>
-
-          <label class="field">
-            <span>Label (sub-category)</span>
-            <input name="label" list="label-list" maxlength="120" autocomplete="off" placeholder="Pick a category first">
-          </label>
-          <datalist id="label-list"></datalist>
-
-          <label class="field">
-            <span>Paid to <span class="req">*</span></span>
-            <input name="paid_to" required maxlength="160" placeholder="Person / company">
-          </label>
-
-          <label class="field">
-            <span>Payment mode</span>
-            <select name="payment_mode">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label class="field">
-            <span>Approved by <span class="req">*</span></span>
-            <input name="approved_by" required maxlength="120" placeholder="Name">
-          </label>
-
-          <label class="field">
-            <span>Entered by</span>
-            <input name="entered_by" maxlength="120" placeholder="Your name">
-          </label>
-
-          <label class="field span-2">
-            <span>Notes</span>
-            <textarea name="notes" rows="2" maxlength="1000" placeholder="Bill no., quantity, anything else…"></textarea>
-          </label>
-        </div>
-
+        <div class="fields"></div>
         <div class="form-actions">
           <button type="submit" class="btn primary" id="save-btn">Save expense</button>
-          <button type="reset" class="btn">Clear</button>
+          <button type="button" class="btn" id="clear-btn">Clear</button>
         </div>
       </form>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>My recent entries</h2>
+        <span class="muted" id="mine-total"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="compact">
+          <thead>
+            <tr><th>Date</th><th>Project</th><th>Category</th><th>Paid to</th><th class="num">Amount</th><th>Approved by</th><th>Recorded at</th></tr>
+          </thead>
+          <tbody id="mine"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="muted small-note">Made a mistake? Ask the Admin to correct it.</p>
     </section>
   </main>
 

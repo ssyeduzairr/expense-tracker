@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Log in · Expenses</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>₹</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="ready">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">₹</span><span class="brand-name">Expense Tracker</span></div>
+  </header>
+
+  <main class="container">
+    <div id="config-warning" class="banner warn" hidden>
+      <strong>Not connected to the database yet.</strong> Open <code>config.js</code> and paste your Supabase URL and key (see README).
+    </div>
+
+    <section id="login" class="card login" hidden>
+      <h1>Log in</h1>
+      <p class="muted">Enter the username and password your Admin gave you.</p>
+      <form id="login-form">
+        <div class="grid one">
+          <label class="field"><span>Username</span>
+            <input name="username" required autocomplete="username" autocapitalize="none" spellcheck="false"></label>
+          <label class="field"><span>Password</span>
+            <input type="password" name="password" required autocomplete="current-password"></label>
+        </div>
+        <div class="form-actions"><button class="btn primary block" id="login-btn">Log in</button></div>
+      </form>
+      <p class="muted small-note">Forgot your password? Ask the Admin to reset it.</p>
+    </section>
+
+    <section id="setup" class="card login" hidden>
+      <h1>Create the Admin account</h1>
+      <p class="muted">First-time setup. This person gets full access and creates logins for everyone else. This screen appears only once.</p>
+      <form id="setup-form">
+        <div class="grid one">
+          <label class="field"><span>Your name</span>
+            <input name="full_name" required maxlength="80" placeholder="e.g. Rajesh Kumar"></label>
+          <label class="field"><span>Username (letters/numbers, no spaces)</span>
+            <input name="username" required pattern="[A-Za-z0-9._\-]{3,30}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="e.g. rajesh"></label>
+          <label class="field"><span>Password (8+ characters)</span>
+            <input type="password" name="new1" required minlength="8" autocomplete="new-password"></label>
+          <label class="field"><span>Repeat password</span>
+            <input type="password" name="new2" required minlength="8" autocomplete="new-password"></label>
+        </div>
+        <div class="form-actions"><button class="btn primary block" id="setup-btn">Create Admin account</button></div>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>

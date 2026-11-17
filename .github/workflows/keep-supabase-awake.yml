@@ -17,7 +17,7 @@ jobs:
         run: |
           URL=$(grep -oP 'SUPABASE_URL:\s*"\K[^"]+' config.js)
           KEY=$(grep -oP 'SUPABASE_ANON_KEY:\s*"\K[^"]+' config.js)
-          curl -fsS -X POST "$URL/rest/v1/rpc/list_projects" \
+          curl -fsS -X POST "$URL/rest/v1/rpc/setup_needed" \
             -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
             -H "Content-Type: application/json" -d '{}' > /dev/null
           echo "Supabase pinged OK"

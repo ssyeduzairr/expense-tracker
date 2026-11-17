@@ -1,70 +1,73 @@
-// "Add expense" page
-(function () {
-  const form = document.getElementById("expense-form");
-  const saveBtn = document.getElementById("save-btn");
-  const labelList = document.getElementById("label-list");
+// "Add expense" page — every logged-in user
+(async function () {
+  const user = await startPage(null);
+  if (!user) return;
 
-  Object.keys(CATEGORIES).forEach(c => form.category.add(new Option(c, c)));
-  PAYMENT_MODES.forEach(m => form.payment_mode.add(new Option(m, m)));
+  const form = $("#expense-form");
+  const saveBtn = $("#save-btn");
+  form.querySelector(".fields").innerHTML = EXPENSE_FIELDS_HTML;
 
-  form.category.addEventListener("change", () => {
-    const labels = CATEGORIES[form.category.value] || [];
-    labelList.innerHTML = labels.map(l => `<option value="${esc(l)}">`).join("");
-    form.label.placeholder = labels.length ? "Type or pick, e.g. " + labels[0] : "Optional";
-  });
+  let options;
+  try { options = await loadOptions(); }
+  catch (e) { toast(e.message, "error"); return; }
 
-  function setDefaults() {
-    form.expense_date.value = todayISO();
-    const who = store.get("et_entered_by");
-    if (who) form.entered_by.value = who;
+  if (!options.projects.some(p => p.active)) {
+    const b = $("#no-projects");
+    b.innerHTML = user.role === "admin"
+      ? `<strong>No projects yet.</strong> Add your projects in <a href="admin.html">Settings</a> first.`
+      : `<strong>No projects yet.</strong> Ask the Admin to add projects.`;
+    b.hidden = false;
   }
-  setDefaults();
-  form.addEventListener("reset", () => setTimeout(setDefaults, 0));
-  loadProjects();
+
+  setupExpenseForm(form, options, { expense_date: todayISO() });
+
+  $("#clear-btn").addEventListener("click", () => {
+    setupExpenseForm(form, options, { project_name: form.project_name.value, expense_date: form.expense_date.value });
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (!validateForm(form)) return;
+    const payload = readExpenseForm(form);
 
-    const v = name => (form[name].value || "").trim();
-    for (const name of ["project_name", "paid_to", "approved_by"]) {
-      if (!v(name)) { form[name].value = ""; }   // whitespace-only → let browser flag it
-    }
-    if (!form.reportValidity()) return;
-
-    if (!db) { toast("Not connected to the database yet — see config.js", "error"); return; }
-
-    const payload = {
-      project_name: v("project_name"),
-      expense_date: v("expense_date"),
-      category:     v("category"),
-      label:        v("label") || null,
-      paid_to:      v("paid_to"),
-      amount:       Math.round(Number(form.amount.value) * 100) / 100,
-      payment_mode: v("payment_mode") || null,
-      approved_by:  v("approved_by"),
-      entered_by:   v("entered_by") || null,
-      notes:        v("notes") || null
-    };
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Saving…";
-    const { error } = await db.from("expenses").insert(payload);
-    saveBtn.disabled = false;
-    saveBtn.textContent = "Save expense";
-
-    if (error) { toast(friendlyError(error), "error"); return; }
-
-    if (payload.entered_by) store.set("et_entered_by", payload.entered_by);
-    toast(`Saved ${formatINR(payload.amount)} for ${payload.project_name}`);
-
-    // Keep project + date for quick multiple entries; clear the rest
-    const keepProject = payload.project_name, keepDate = payload.expense_date;
-    form.reset();
-    setTimeout(() => {
-      form.project_name.value = keepProject;
-      form.expense_date.value = keepDate;
+    saveBtn.disabled = true; saveBtn.textContent = "Saving…";
+    try {
+      await rpc("add_expense", { p_data: payload });
+      toast(`Saved ${formatINR(payload.amount)} for ${payload.project_name}`);
+      // Keep project + date for quick multiple entries; clear the rest
+      setupExpenseForm(form, options, { project_name: payload.project_name, expense_date: payload.expense_date });
       form.amount.focus();
-    }, 0);
-    loadProjects();
+      loadMine();
+    } catch (err) {
+      toast(err.message, "error");
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = "Save expense";
+    }
   });
+
+  async function loadMine() {
+    const body = $("#mine");
+    try {
+      const rows = await rpc("get_expenses", { p_mine: true, p_limit: 30 });
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="7" class="empty">You haven't added any expenses yet.</td></tr>`;
+        $("#mine-total").textContent = "";
+        return;
+      }
+      body.innerHTML = rows.map(r => `
+        <tr>
+          <td class="nowrap">${formatDate(r.expense_date)}</td>
+          <td>${esc(r.project_name)}</td>
+          <td>${esc(r.category)}${r.label ? `<div class="muted sub">${esc(r.label)}</div>` : ""}</td>
+          <td>${esc(r.paid_to)}</td>
+          <td class="num">${formatINR(r.amount)}</td>
+          <td>${esc(r.approved_by)}</td>
+          <td class="nowrap muted">${formatTimestamp(r.created_at)}</td>
+        </tr>`).join("");
+      $("#mine-total").textContent = `Last ${rows.length} entries`;
+    } catch (err) {
+      body.innerHTML = `<tr><td colspan="7" class="empty">${esc(err.message)}</td></tr>`;
+    }
+  }
+  loadMine();
 })();
